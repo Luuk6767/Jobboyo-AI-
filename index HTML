@@ -2,55 +2,42 @@
 <html lang="sv">
 <head>
     <meta charset="UTF-8">
-    <title>Jobboyo - Om oss</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jobboyo - Professionell Rekrytering</title>
+    <link rel="stylesheet" href="../utseende/style.css">
 </head>
 <body>
 
     <header>
-        <h1>Jobboyo</h1>
-        <nav>
-            <ul>
-                <li><a href="#om">Om Jobboyo</a></li>
-                <li><a href="#tjanster">Våra Tjänster</a></li>
-                <li><a href="#vision">Vår Vision</a></li>
-            </ul>
-        </nav>
+        <div class="container">
+            <h1>Jobboyo</h1>
+            <p>Där talang möter möjlighet</p>
+        </div>
     </header>
 
-    <hr>
+    <main class="container">
+        <section id="om">
+            <h2>Om Jobboyo</h2>
+            <p>Jobboyo är plattformen som gör det enkelt för företag att hitta rätt personal och för arbetssökande att hitta sitt nästa drömjobb.</p>
+        </section>
 
-    <section id="om">
-        <h2>Vad är Jobboyo?</h2>
-        <p>Jobboyo är en modern plattform för jobbmatchning som kopplar samman rätt talang med rätt arbetsgivare. Genom att fokusera på effektivitet och användarvänlighet hjälper vi både företag och arbetssökande att hitta varandra snabbare.</p>
-    </section>
-
-    <section id="tjanster">
-        <h2>Våra Tjänster</h2>
-        <ul>
-            <li>
-                <h3>Smart Matchning</h3>
-                <p>Vi använder algoritmer för att matcha kandidaters kompetens mot specifika arbetskrav.</p>
-            </li>
-            <li>
-                <h3>Snabb Rekrytering</h3>
-                <p>Vi minimerar ledtider i rekryteringsprocessen genom digitala verktyg.</p>
-            </li>
-            <li>
-                <h3>Enkel profilhantering</h3>
-                <p>Arbetssökande kan enkelt skapa och uppdatera sina profiler för att vara synliga för attraktiva arbetsgivare.</p>
-            </li>
-        </ul>
-    </section>
-
-    <section id="vision">
-        <h2>Vår Vision</h2>
-        <p>Jobboyo strävar efter att göra arbetsmarknaden mer tillgänglig och transparent för alla. Vi tror på en värld där rätt person hamnar på rätt plats baserat på faktiska kunskaper och potential.</p>
-    </section>
-
-    <hr>
+        <section id="funktioner">
+            <h2>Varför Jobboyo?</h2>
+            <div class="grid">
+                <div class="item">
+                    <h3>Enkelt</h3>
+                    <p>Snabb registrering och smidigt gränssnitt.</p>
+                </div>
+                <div class="item">
+                    <h3>Smart</h3>
+                    <p>Algoritmer som matchar rätt kompetens.</p>
+                </div>
+            </div>
+        </section>
+    </main>
 
     <footer>
-        <p>&copy; 2026 Jobboyo - Alla rättigheter reserverade.</p>
+        <p>&copy; 2026 Jobboyo</p>
     </footer>
 
 </body>
