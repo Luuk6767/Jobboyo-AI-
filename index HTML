@@ -2,150 +2,55 @@
 <html lang="sv">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jobboyo AI | Framtidens Rekrytering</title>
-    <style>
-        /* Grundinställningar */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: #0f172a;
-            color: #f8fafc;
-            line-height: 1.6;
-        }
-
-        /* Header & Navigation */
-        header {
-            background: rgba(15, 23, 42, 0.9);
-            padding: 1rem 5%;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #1e293b;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #38bdf8;
-        }
-
-        /* Hero Section */
-        .hero {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 0 20px;
-            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
-        }
-
-        .hero h1 {
-            font-size: 3.5rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(to right, #38bdf8, #818cf8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .hero p {
-            font-size: 1.2rem;
-            max-width: 600px;
-            color: #94a3b8;
-            margin-bottom: 2rem;
-        }
-
-        .btn {
-            background: #38bdf8;
-            color: #0f172a;
-            padding: 0.8rem 2rem;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: bold;
-            transition: transform 0.3s ease;
-        }
-
-        .btn:hover {
-            transform: scale(1.05);
-            background: #7dd3fc;
-        }
-
-        /* Features Section */
-        .features {
-            padding: 5rem 10%;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            background: #0f172a;
-        }
-
-        .card {
-            background: #1e293b;
-            padding: 2rem;
-            border-radius: 15px;
-            border: 1px solid #334155;
-            transition: 0.3s;
-        }
-
-        .card:hover {
-            border-color: #38bdf8;
-        }
-
-        .card h3 {
-            color: #38bdf8;
-            margin-bottom: 1rem;
-        }
-
-        /* Footer */
-        footer {
-            text-align: center;
-            padding: 2rem;
-            font-size: 0.9rem;
-            color: #64748b;
-            border-top: 1px solid #1e293b;
-        }
-    </style>
+    <title>Jobboyo - Om oss</title>
 </head>
 <body>
 
     <header>
-        <div class="logo">Jobboyo AI</div>
+        <h1>Jobboyo</h1>
+        <nav>
+            <ul>
+                <li><a href="#om">Om Jobboyo</a></li>
+                <li><a href="#tjanster">Våra Tjänster</a></li>
+                <li><a href="#vision">Vår Vision</a></li>
+            </ul>
+        </nav>
     </header>
 
-    <section class="hero">
-        <h1>Revolutionera ditt arbetssökande</h1>
-        <p>Jobboyo AI använder avancerad maskininlärning för att matcha rätt talang med rätt företag. Snabbare, smartare och helt fördomsfritt.</p>
-        <a href="#" class="btn">Kom igång nu</a>
+    <hr>
+
+    <section id="om">
+        <h2>Vad är Jobboyo?</h2>
+        <p>Jobboyo är en modern plattform för jobbmatchning som kopplar samman rätt talang med rätt arbetsgivare. Genom att fokusera på effektivitet och användarvänlighet hjälper vi både företag och arbetssökande att hitta varandra snabbare.</p>
     </section>
 
-    <section class="features">
-        <div class="card">
-            <h3>Smart Matchning</h3>
-            <p>Vår AI analyserar inte bara nyckelord, utan förstår kontexten i din erfarenhet och företagets kultur.</p>
-        </div>
-        <div class="card">
-            <h3>Automatiserade CV-tips</h3>
-            <p>Få feedback i realtid på hur du kan optimera din profil för att fånga rekryterarens uppmärksamhet.</p>
-        </div>
-        <div class="card">
-            <h3>Fördomsfri rekrytering</h3>
-            <p>Vi tar bort mänskliga bias i det första urvalet så att kompetens alltid kommer i första hand.</p>
-        </div>
+    <section id="tjanster">
+        <h2>Våra Tjänster</h2>
+        <ul>
+            <li>
+                <h3>Smart Matchning</h3>
+                <p>Vi använder algoritmer för att matcha kandidaters kompetens mot specifika arbetskrav.</p>
+            </li>
+            <li>
+                <h3>Snabb Rekrytering</h3>
+                <p>Vi minimerar ledtider i rekryteringsprocessen genom digitala verktyg.</p>
+            </li>
+            <li>
+                <h3>Enkel profilhantering</h3>
+                <p>Arbetssökande kan enkelt skapa och uppdatera sina profiler för att vara synliga för attraktiva arbetsgivare.</p>
+            </li>
+        </ul>
     </section>
+
+    <section id="vision">
+        <h2>Vår Vision</h2>
+        <p>Jobboyo strävar efter att göra arbetsmarknaden mer tillgänglig och transparent för alla. Vi tror på en värld där rätt person hamnar på rätt plats baserat på faktiska kunskaper och potential.</p>
+    </section>
+
+    <hr>
 
     <footer>
-        &copy; 2026 Jobboyo AI. Alla rättigheter reserverade.
+        <p>&copy; 2026 Jobboyo - Alla rättigheter reserverade.</p>
     </footer>
 
 </body>
