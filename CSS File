@@ -1,118 +1,63 @@
-/* Grundinställningar */
+/* Grundstil */
 body {
-    font-family: 'Segoe UI', Arial, sans-serif;
-    line-height: 1.6;
-    color: #333;
-    background-color: #f4f7f6;
     margin: 0;
-    padding: 0;
+    font-family: 'Helvetica', sans-serif;
+    background-color: #f0f2f5;
+    color: #333;
 }
 
-/* Header och Navigation */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header */
 header {
-    background-color: #1a2a3a;
-    color: #ffffff;
-    padding: 2rem 5%;
+    background-color: #004a99;
+    color: white;
     text-align: center;
+    padding: 60px 0;
 }
 
 header h1 {
     margin: 0;
-    font-size: 2.5rem;
-    letter-spacing: 2px;
-    color: #4CAF50; /* Grön accentfärg för Jobboyo */
-}
-
-nav ul {
-    list-style: none;
-    padding: 0;
-    margin-top: 1.5rem;
-}
-
-nav ul li {
-    display: inline;
-    margin: 0 15px;
-}
-
-nav ul li a {
-    color: #fff;
-    text-decoration: none;
-    font-weight: bold;
-    transition: color 0.3s;
-}
-
-nav ul li a:hover {
-    color: #4CAF50;
-}
-
-/* Horisontell linje */
-hr {
-    border: 0;
-    height: 1px;
-    background: #ddd;
-    margin: 0;
+    font-size: 3rem;
 }
 
 /* Sektioner */
 section {
-    max-width: 900px;
-    margin: 40px auto;
-    padding: 20px;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+    background: white;
+    margin: 20px 0;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
 h2 {
-    color: #1a2a3a;
-    border-left: 5px solid #4CAF50;
-    padding-left: 15px;
-    margin-bottom: 20px;
+    color: #004a99;
+    border-bottom: 2px solid #004a99;
+    padding-bottom: 10px;
 }
 
-/* Listan under tjänster */
-#tjanster ul {
-    list-style: none;
-    padding: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+/* Grid för funktioner */
+.grid {
+    display: flex;
     gap: 20px;
+    margin-top: 20px;
 }
 
-#tjanster li {
-    background: #f9f9f9;
-    padding: 20px;
-    border-radius: 5px;
-    border: 1px solid #eee;
-}
-
-#tjanster h3 {
-    margin-top: 0;
-    color: #4CAF50;
-}
-
-/* Vision-sektionen */
-#vision {
-    background-color: #e8f5e9;
-    border: none;
+.item {
+    flex: 1;
+    background: #e7f0ff;
+    padding: 15px;
+    border-radius: 8px;
 }
 
 /* Footer */
 footer {
     text-align: center;
-    padding: 30px;
-    color: #777;
-    font-size: 0.9rem;
-}
-
-/* Responsivitet för mobilen */
-@media (max-width: 600px) {
-    nav ul li {
-        display: block;
-        margin-bottom: 10px;
-    }
-    
-    header h1 {
-        font-size: 1.8rem;
-    }
+    padding: 20px;
+    font-size: 0.8rem;
+    color: #666;
 }
