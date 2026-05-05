@@ -1,1056 +1,445 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jobbyo – Din AI-agent för smarta jobbansökningar</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --green: #00c875;
-    --green-dark: #009e5c;
-    --green-light: #d4f7e7;
-    --bg: #0a0f0d;
-    --bg2: #111a14;
-    --bg3: #162019;
-    --surface: #1a2a1e;
-    --border: rgba(0,200,117,0.15);
-    --border2: rgba(255,255,255,0.06);
-    --text: #f0f4f1;
-    --muted: #7a9980;
-    --accent: #b8f5d6;
-  }
- 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
- 
-  html { scroll-behavior: smooth; }
- 
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    line-height: 1.7;
-    overflow-x: hidden;
-  }
- 
-  /* NOISE TEXTURE OVERLAY */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.4;
-  }
- 
-  /* NAV */
-  nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem 2.5rem;
-    background: rgba(10,15,13,0.85);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border2);
-  }
- 
-  .nav-logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 1.2rem;
-    color: var(--text);
-    text-decoration: none;
-  }
- 
-  .nav-logo-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    background: var(--green);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
- 
-  .nav-logo-icon svg { width: 18px; height: 18px; }
- 
-  .nav-links {
-    display: flex;
-    gap: 2rem;
-    list-style: none;
-  }
- 
-  .nav-links a {
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 400;
-    transition: color 0.2s;
-  }
- 
-  .nav-links a:hover { color: var(--text); }
- 
-  .nav-cta {
-    background: var(--green);
-    color: #0a0f0d;
-    border: none;
-    border-radius: 8px;
-    padding: 8px 20px;
-    font-size: 14px;
-    font-weight: 600;
-    font-family: 'DM Sans', sans-serif;
-    cursor: pointer;
-    text-decoration: none;
-    transition: background 0.2s, transform 0.15s;
-  }
- 
-  .nav-cta:hover { background: #00e688; transform: translateY(-1px); }
- 
-  /* HERO */
-  .hero {
-    position: relative;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 8rem 2rem 4rem;
-    overflow: hidden;
-  }
- 
-  .hero-glow {
-    position: absolute;
-    top: -100px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 700px;
-    height: 700px;
-    background: radial-gradient(circle, rgba(0,200,117,0.12) 0%, transparent 70%);
-    pointer-events: none;
-    animation: pulse 4s ease-in-out infinite;
-  }
- 
-  @keyframes pulse {
-    0%, 100% { opacity: 0.7; transform: translateX(-50%) scale(1); }
-    50% { opacity: 1; transform: translateX(-50%) scale(1.05); }
-  }
- 
-  .hero-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(0,200,117,0.1);
-    border: 1px solid rgba(0,200,117,0.25);
-    border-radius: 99px;
-    padding: 6px 16px;
-    font-size: 13px;
-    color: var(--green);
-    margin-bottom: 2rem;
-    animation: fadeUp 0.6s ease both;
-  }
- 
-  .hero-badge span { width: 6px; height: 6px; border-radius: 50%; background: var(--green); display: inline-block; animation: blink 2s infinite; }
- 
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
- 
-  .hero h1 {
-    font-family: 'Syne', sans-serif;
-    font-size: clamp(2.8rem, 7vw, 5.5rem);
-    font-weight: 800;
-    line-height: 1.05;
-    letter-spacing: -0.02em;
-    margin-bottom: 1.5rem;
-    animation: fadeUp 0.6s ease 0.1s both;
-  }
- 
-  .hero h1 em {
-    font-style: normal;
-    color: var(--green);
-  }
- 
-  .hero p {
-    font-size: 1.15rem;
-    color: var(--muted);
-    max-width: 560px;
-    margin: 0 auto 2.5rem;
-    font-weight: 300;
-    animation: fadeUp 0.6s ease 0.2s both;
-  }
- 
-  .hero-actions {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    flex-wrap: wrap;
-    animation: fadeUp 0.6s ease 0.3s both;
-  }
- 
-  .btn-primary {
-    background: var(--green);
-    color: #0a0f0d;
-    border: none;
-    border-radius: 10px;
-    padding: 14px 32px;
-    font-size: 15px;
-    font-weight: 600;
-    font-family: 'DM Sans', sans-serif;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all 0.2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-  }
- 
-  .btn-primary:hover { background: #00e688; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,200,117,0.3); }
- 
-  .btn-secondary {
-    background: transparent;
-    color: var(--text);
-    border: 1px solid var(--border2);
-    border-radius: 10px;
-    padding: 14px 32px;
-    font-size: 15px;
-    font-weight: 400;
-    font-family: 'DM Sans', sans-serif;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all 0.2s;
-  }
- 
-  .btn-secondary:hover { border-color: var(--border); background: var(--surface); }
- 
-  .hero-stats {
-    display: flex;
-    gap: 3rem;
-    margin-top: 4rem;
-    animation: fadeUp 0.6s ease 0.4s both;
-  }
- 
-  .hero-stat { text-align: center; }
-  .hero-stat .num {
-    font-family: 'Syne', sans-serif;
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--green);
-    display: block;
-  }
-  .hero-stat .label { font-size: 13px; color: var(--muted); }
- 
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
- 
-  /* SECTION LAYOUT */
-  section {
-    padding: 6rem 2rem;
-    max-width: 1100px;
-    margin: 0 auto;
-    position: relative;
-    z-index: 1;
-  }
- 
-  .section-tag {
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--green);
-    margin-bottom: 1rem;
-  }
- 
-  .section-title {
-    font-family: 'Syne', sans-serif;
-    font-size: clamp(1.8rem, 4vw, 2.8rem);
-    font-weight: 700;
-    line-height: 1.15;
-    letter-spacing: -0.01em;
-    margin-bottom: 1rem;
-  }
- 
-  .section-lead {
-    font-size: 1.05rem;
-    color: var(--muted);
-    max-width: 560px;
-    font-weight: 300;
-    margin-bottom: 3rem;
-  }
- 
-  .divider {
-    height: 1px;
-    background: linear-gradient(to right, transparent, var(--border), transparent);
-    margin: 0 2rem;
-  }
- 
-  /* HOW IT WORKS */
-  .steps {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1px;
-    background: var(--border2);
-    border: 1px solid var(--border2);
-    border-radius: 16px;
-    overflow: hidden;
-  }
- 
-  .step {
-    background: var(--bg2);
-    padding: 2rem;
-    transition: background 0.2s;
-  }
- 
-  .step:hover { background: var(--bg3); }
- 
-  .step-num {
-    font-family: 'Syne', sans-serif;
-    font-size: 3rem;
-    font-weight: 800;
-    color: rgba(0,200,117,0.12);
-    line-height: 1;
-    margin-bottom: 1rem;
-  }
- 
-  .step h3 {
-    font-family: 'Syne', sans-serif;
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    color: var(--text);
-  }
- 
-  .step p { font-size: 14px; color: var(--muted); line-height: 1.65; }
- 
-  /* FEATURES */
-  .features-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 16px;
-  }
- 
-  .feature {
-    background: var(--bg2);
-    border: 1px solid var(--border2);
-    border-radius: 14px;
-    padding: 1.75rem;
-    transition: border-color 0.2s, transform 0.2s;
-  }
- 
-  .feature:hover {
-    border-color: var(--border);
-    transform: translateY(-2px);
-  }
- 
-  .feature-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    background: rgba(0,200,117,0.1);
-    border: 1px solid rgba(0,200,117,0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 1rem;
-  }
- 
-  .feature-icon svg { width: 18px; height: 18px; stroke: var(--green); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
- 
-  .feature h3 {
-    font-family: 'Syne', sans-serif;
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-  }
- 
-  .feature p { font-size: 14px; color: var(--muted); line-height: 1.65; }
- 
-  /* PROS & CONS */
-  .pros-cons-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
- 
-  @media (max-width: 600px) {
-    .pros-cons-grid { grid-template-columns: 1fr; }
-    .hero-stats { gap: 1.5rem; }
-    nav .nav-links { display: none; }
-  }
- 
-  .pros-box, .cons-box {
-    border-radius: 14px;
-    padding: 1.75rem;
-  }
- 
-  .pros-box {
-    background: rgba(0,200,117,0.05);
-    border: 1px solid rgba(0,200,117,0.2);
-  }
- 
-  .cons-box {
-    background: rgba(255,160,50,0.05);
-    border: 1px solid rgba(255,160,50,0.2);
-  }
- 
-  .pros-box h3 {
-    font-family: 'Syne', sans-serif;
-    font-weight: 600;
-    font-size: 0.95rem;
-    color: var(--green);
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
- 
-  .cons-box h3 {
-    font-family: 'Syne', sans-serif;
-    font-weight: 600;
-    font-size: 0.95rem;
-    color: #ffa032;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
- 
-  .pros-box ul, .cons-box ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
- 
-  .pros-box li, .cons-box li {
-    font-size: 14px;
-    color: var(--muted);
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    line-height: 1.5;
-  }
- 
-  .pros-box li::before {
-    content: '';
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: rgba(0,200,117,0.15);
-    border: 1px solid rgba(0,200,117,0.3);
-    flex-shrink: 0;
-    margin-top: 1px;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 8l2.5 2.5L12 5' stroke='%2300c875' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-    background-size: contain;
-  }
- 
-  .cons-box li::before {
-    content: '';
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: rgba(255,160,50,0.1);
-    border: 1px solid rgba(255,160,50,0.25);
-    flex-shrink: 0;
-    margin-top: 1px;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8 5v4M8 11v.5' stroke='%23ffa032' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-size: contain;
-  }
- 
-  /* PRICING */
-  .pricing-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 16px;
-    align-items: start;
-  }
- 
-  .price-card {
-    background: var(--bg2);
-    border: 1px solid var(--border2);
-    border-radius: 16px;
-    padding: 2rem;
-    transition: border-color 0.2s;
-  }
- 
-  .price-card:hover { border-color: var(--border); }
- 
-  .price-card.featured {
-    background: var(--bg3);
-    border: 1px solid rgba(0,200,117,0.35);
-    position: relative;
-  }
- 
-  .popular-tag {
-    position: absolute;
-    top: -12px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--green);
-    color: #0a0f0d;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 4px 14px;
-    border-radius: 99px;
-    white-space: nowrap;
-    font-family: 'Syne', sans-serif;
-  }
- 
-  .plan-name {
-    font-family: 'Syne', sans-serif;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 1rem;
-  }
- 
-  .plan-price {
-    font-family: 'Syne', sans-serif;
-    font-size: 2.8rem;
-    font-weight: 800;
-    color: var(--text);
-    line-height: 1;
-    margin-bottom: 4px;
-  }
- 
-  .plan-price sup { font-size: 1rem; vertical-align: super; }
- 
-  .plan-period {
-    font-size: 13px;
-    color: var(--muted);
-    margin-bottom: 1.5rem;
-  }
- 
-  .plan-divider { height: 1px; background: var(--border2); margin-bottom: 1.5rem; }
- 
-  .plan-features { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.75rem; }
- 
-  .plan-features li {
-    font-size: 14px;
-    color: var(--muted);
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-    line-height: 1.5;
-  }
- 
-  .plan-features li .check {
-    color: var(--green);
-    font-size: 16px;
-    line-height: 1.4;
-    flex-shrink: 0;
-  }
- 
-  .plan-btn {
-    width: 100%;
-    padding: 12px;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
-    font-family: 'DM Sans', sans-serif;
-    cursor: pointer;
-    text-align: center;
-    text-decoration: none;
-    display: block;
-    transition: all 0.2s;
-  }
- 
-  .plan-btn-outline {
-    background: transparent;
-    border: 1px solid var(--border2);
-    color: var(--text);
-  }
- 
-  .plan-btn-outline:hover { border-color: var(--border); background: var(--surface); }
- 
-  .plan-btn-filled {
-    background: var(--green);
-    border: none;
-    color: #0a0f0d;
-  }
- 
-  .plan-btn-filled:hover { background: #00e688; box-shadow: 0 4px 16px rgba(0,200,117,0.3); }
- 
-  /* WHO IS IT FOR */
-  .who-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
-  }
- 
-  .who-card {
-    background: var(--bg2);
-    border: 1px solid var(--border2);
-    border-radius: 14px;
-    padding: 1.5rem;
-    transition: border-color 0.2s, transform 0.2s;
-  }
- 
-  .who-card:hover { border-color: var(--border); transform: translateY(-2px); }
- 
-  .who-emoji {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-    display: block;
-  }
- 
-  .who-card h3 {
-    font-family: 'Syne', sans-serif;
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 0.4rem;
-  }
- 
-  .who-card p { font-size: 13px; color: var(--muted); line-height: 1.6; }
- 
-  /* QUOTE */
-  .testimonials {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 16px;
-  }
- 
-  .quote {
-    background: var(--bg2);
-    border: 1px solid var(--border2);
-    border-radius: 14px;
-    padding: 1.75rem;
-  }
- 
-  .quote-text {
-    font-size: 14px;
-    color: var(--muted);
-    line-height: 1.7;
-    font-style: italic;
-    margin-bottom: 1rem;
-  }
- 
-  .quote-author {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
- 
-  .avatar {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: rgba(0,200,117,0.15);
-    border: 1px solid rgba(0,200,117,0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--green);
-    font-family: 'Syne', sans-serif;
-  }
- 
-  .stars { color: var(--green); font-size: 12px; margin-bottom: 0.75rem; }
- 
-  /* CTA SECTION */
-  .cta-section {
-    text-align: center;
-    padding: 6rem 2rem;
-    max-width: 700px;
-    margin: 0 auto;
-    position: relative;
-    z-index: 1;
-  }
- 
-  .cta-glow {
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 500px;
-    height: 300px;
-    background: radial-gradient(ellipse, rgba(0,200,117,0.08) 0%, transparent 70%);
-    pointer-events: none;
-  }
- 
-  .cta-section h2 {
-    font-family: 'Syne', sans-serif;
-    font-size: clamp(1.8rem, 4vw, 2.8rem);
-    font-weight: 700;
-    margin-bottom: 1rem;
-    letter-spacing: -0.01em;
-  }
- 
-  .cta-section p { color: var(--muted); margin-bottom: 2rem; font-size: 1.05rem; }
- 
-  /* FOOTER */
-  footer {
-    border-top: 1px solid var(--border2);
-    padding: 2.5rem;
-    text-align: center;
-    font-size: 13px;
-    color: var(--muted);
-    position: relative;
-    z-index: 1;
-  }
- 
-  footer a { color: var(--green); text-decoration: none; }
-  footer a:hover { text-decoration: underline; }
- 
-  /* SCROLL REVEAL */
-  .reveal {
-    opacity: 0;
-    transform: translateY(24px);
-    transition: opacity 0.65s ease, transform 0.65s ease;
-  }
- 
-  .reveal.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jobbyo – Din AI-agent för smarta jobbansökningar</title>
+  <link rel="stylesheet" href="jobboyo.css">
 </head>
 <body>
- 
+
+<!-- NAVBAR -->
 <nav>
   <a href="#" class="nav-logo">
     <div class="nav-logo-icon">
-      <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 18 18" fill="none">
         <circle cx="9" cy="9" r="7" stroke="#0a0f0d" stroke-width="2"/>
-        <path d="M6 9l2 2 4-4" stroke="#0a0f0d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M6 9l2 2 4-4" stroke="#0a0f0d" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </div>
     Jobbyo
   </a>
   <ul class="nav-links">
     <li><a href="#hur">Hur det fungerar</a></li>
-    <li><a href="#funktioner">Funktioner</a></li>
+    <li><a href="#cv-setup">CV & Inställningar</a></li>
     <li><a href="#priser">Priser</a></li>
-    <li><a href="#vem">För vem?</a></li>
+    <li><a href="#faq">FAQ</a></li>
   </ul>
   <a href="https://jobbyo.ai" target="_blank" class="nav-cta">Prova gratis →</a>
 </nav>
- 
+
 <!-- HERO -->
 <div class="hero">
   <div class="hero-glow"></div>
-  <div class="hero-badge">
-    <span></span>
-    AI-agent för jobbsökning
-  </div>
+  <div class="hero-badge"><span></span> AI-agent för jobbsökning · 3-dagars gratis provperiod</div>
   <h1>Jobbyo söker<br>jobbet <em>åt dig</em></h1>
-  <p>En AI-driven agent som hittar relevanta tjänster, anpassar ditt CV, skriver personliga brev och ansöker automatiskt – 24 timmar om dygnet.</p>
+  <p>En AI-agent som hittar relevanta tjänster, skräddarsyr ditt CV,
+     skriver personliga brev och ansöker automatiskt – medan du fokuserar
+     på att förbereda dig för intervjuer.</p>
   <div class="hero-actions">
-    <a href="https://jobbyo.ai" target="_blank" class="btn-primary">
-      Kom igång gratis
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M7 2l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </a>
+    <a href="https://jobbyo.ai" target="_blank" class="btn-primary">Kom igång gratis →</a>
     <a href="#hur" class="btn-secondary">Läs mer</a>
   </div>
   <div class="hero-stats">
-    <div class="hero-stat">
-      <span class="num">3×</span>
-      <span class="label">fler intervjukallelser</span>
-    </div>
-    <div class="hero-stat">
-      <span class="num">20h+</span>
-      <span class="label">sparad tid per vecka</span>
-    </div>
-    <div class="hero-stat">
-      <span class="num">40+</span>
-      <span class="label">ansökningar per vecka</span>
-    </div>
+    <div class="hero-stat"><span class="num">3×</span><span class="label">fler intervjukallelser</span></div>
+    <div class="hero-stat"><span class="num">2–3v</span><span class="label">till första intervjun</span></div>
+    <div class="hero-stat"><span class="num">10+</span><span class="label">matchningar per dag</span></div>
   </div>
 </div>
- 
+
 <div class="divider"></div>
- 
+
 <!-- HUR DET FUNGERAR -->
 <section id="hur">
   <div class="reveal">
     <div class="section-tag">Hur det fungerar</div>
-    <h2 class="section-title">Från CV till kallelse –<br>automatiskt</h2>
-    <p class="section-lead">Jobbyo tar hand om hela processen. Du laddar upp ditt CV, sätter dina preferenser och låter AI:n göra resten.</p>
+    <h2 class="section-title">Från CV till kallelse – automatiskt</h2>
+    <p class="section-lead">Jobbyo tar hand om hela processen. Ladda upp CV, sätt dina preferenser och låt AI:n göra resten.</p>
   </div>
   <div class="steps reveal">
-    <div class="step">
-      <div class="step-num">01</div>
-      <h3>Ladda upp ditt CV</h3>
-      <p>Jobbyo analyserar din bakgrund, kompetenser och karriärmål för att förstå vad du söker.</p>
-    </div>
-    <div class="step">
-      <div class="step-num">02</div>
-      <h3>Smart matchning</h3>
-      <p>AI:n söker igenom tusentals platsannonser dagligen och hittar de som passar dig bäst.</p>
-    </div>
-    <div class="step">
-      <div class="step-num">03</div>
-      <h3>Du godkänner</h3>
-      <p>Granska matchningarna och välj vilka tjänster du vill söka. Du bestämmer alltid.</p>
-    </div>
-    <div class="step">
-      <div class="step-num">04</div>
-      <h3>AI ansöker</h3>
-      <p>Jobbyo skriver ett skräddarsytt personligt brev och anpassar ditt CV för just den rollen.</p>
-    </div>
-    <div class="step">
-      <div class="step-num">05</div>
-      <h3>Lär sig hela tiden</h3>
-      <p>Ju mer du interagerar, desto bättre förstår AI:n vad du verkligen letar efter.</p>
-    </div>
+    <div class="step"><div class="step-num">01</div><h3>Ladda upp CV</h3><p>Du laddar upp ditt CV en gång. Jobbyo analyserar din bakgrund, kompetenser och karriärmål.</p></div>
+    <div class="step"><div class="step-num">02</div><h3>Välj preferenser</h3><p>Ange yrkestitel, nivå, plats, arbetsform och lön. AI:n lär sig vad du söker.</p></div>
+    <div class="step"><div class="step-num">03</div><h3>AI hittar jobb</h3><p>Varje morgon söker Jobbyo igenom tusentals annonser och serverar 10 matchningar.</p></div>
+    <div class="step"><div class="step-num">04</div><h3>Skräddarsydd ansökan</h3><p>CV:t anpassas och ett personligt brev skrivs – specifikt för varje tjänst.</p></div>
+    <div class="step"><div class="step-num">05</div><h3>Ansökan skickas</h3><p>Premium/Max: du godkänner. Starter: AI ansöker automatiskt på dina villkor.</p></div>
+    <div class="step"><div class="step-num">06</div><h3>AI lär sig mer</h3><p>Varje godkännande eller avvisning gör AI:n smartare. Efter 3 dagar träffar den prick.</p></div>
   </div>
 </section>
- 
+
 <div class="divider"></div>
- 
-<!-- FUNKTIONER -->
-<section id="funktioner">
+
+<!-- CV & INSTÄLLNINGAR -->
+<section id="cv-setup">
   <div class="reveal">
-    <div class="section-tag">Funktioner</div>
-    <h2 class="section-title">Allt du behöver för en effektiv jobbsökning</h2>
-    <p class="section-lead">Jobbyo kombinerar kraftfull AI-automation med mänsklig kontroll.</p>
+    <div class="section-tag">CV & Jobbpreferenser</div>
+    <h2 class="section-title">Du bestämmer vad du söker – i detalj</h2>
+    <p class="section-lead">Jobbyo ger dig full kontroll över vilka typer av jobb du vill ha. Ju mer du berättar, desto bättre matchningar.</p>
   </div>
-  <div class="features-grid reveal">
-    <div class="feature">
-      <div class="feature-icon">
-        <svg viewBox="0 0 18 18"><circle cx="8" cy="8" r="5.5"/><path d="M12.5 12.5L15.5 15.5"/></svg>
+  <div class="cv-setup reveal">
+    <div class="cv-left">
+
+      <div class="cv-step-card">
+        <span class="cv-step-num">01</span>
+        <div>
+          <h4>Ladda upp ditt CV</h4>
+          <p>Du laddar upp ditt CV en gång. Jobbyo analyserar erfarenhet, kompetenser och karriärmål. Det används som bas för alla framtida ansökningar och kan uppdateras när som helst.</p>
+        </div>
       </div>
-      <h3>Smart jobbanpassning</h3>
-      <p>AI:n analyserar ditt CV och preferenser och hittar relevanta jobbannonser dagligen – från tusentals källor.</p>
+
+      <div class="cv-step-card">
+        <span class="cv-step-num">02</span>
+        <div>
+          <h4>Välj yrkestitel & bransch</h4>
+          <p>Ange vilken typ av roll du söker, t.ex. "Product Manager" eller "Frontend Developer". Du kan lägga till flera titlar och branscher för att bredda söket.</p>
+        </div>
+      </div>
+
+      <div class="cv-step-card">
+        <span class="cv-step-num">03</span>
+        <div>
+          <h4>Välj erfarenhetsnivå</h4>
+          <p>Från internship och entry level till senior, director och C-nivå. Jobbyo filtrerar bort allt som inte matchar din valda nivå.</p>
+        </div>
+      </div>
+
+      <div class="cv-step-card">
+        <span class="cv-step-num">04</span>
+        <div>
+          <h4>Välj plats & arbetsform</h4>
+          <p>Ange stad eller region och om du söker på plats, hybrid eller fullt remote. Jobbyo söker bara annonser som matchar dina geografiska krav.</p>
+        </div>
+      </div>
+
+      <div class="cv-step-card">
+        <span class="cv-step-num">05</span>
+        <div>
+          <h4>Löneförväntning & tjänstgöringsgrad</h4>
+          <p>Sätt ett löneintervall och välj heltid, deltid eller konsultuppdrag. Jobbyo matchar enbart annonser inom dina ekonomiska och tidsmässiga ramar.</p>
+        </div>
+      </div>
+
+      <div class="cv-step-card">
+        <span class="cv-step-num">06</span>
+        <div>
+          <h4>AI anpassar & ansöker</h4>
+          <p>För varje matchad tjänst justerar AI:n ditt CV och skriver ett personligt, trovärdigt brev – anpassat till rollen och ATS-optimerat.</p>
+        </div>
+      </div>
+
     </div>
-    <div class="feature">
-      <div class="feature-icon">
-        <svg viewBox="0 0 18 18"><rect x="2" y="2" width="14" height="14" rx="2"/><path d="M5 9h8M5 6h8M5 12h5"/></svg>
+    <div class="cv-right">
+      <h3>🎛️ Dina jobbpreferenser</h3>
+
+      <div class="pref-group">
+        <span class="pref-label">Erfarenhetsnivå</span>
+        <div class="tag-row">
+          <span class="tag">Internship</span>
+          <span class="tag active">Entry Level</span>
+          <span class="tag active">Mid Level</span>
+          <span class="tag">Senior</span>
+          <span class="tag">Lead / Staff</span>
+          <span class="tag">Director +</span>
+        </div>
       </div>
-      <h3>CV-anpassning</h3>
-      <p>Ditt CV omarbetas automatiskt för varje tjänst och optimeras för ATS-system som rekryterare använder.</p>
-    </div>
-    <div class="feature">
-      <div class="feature-icon">
-        <svg viewBox="0 0 18 18"><path d="M3 4h12M3 8h9M3 12h6"/><path d="M14 11l2 2-2 2"/></svg>
+
+      <div class="pref-group">
+        <span class="pref-label">Arbetsform</span>
+        <div class="tag-row">
+          <span class="tag active">Remote</span>
+          <span class="tag active">Hybrid</span>
+          <span class="tag">På plats</span>
+        </div>
       </div>
-      <h3>Personliga brev</h3>
-      <p>AI:n skriver övertygande och personliga brev som låter som du – anpassade till rollen och företaget.</p>
-    </div>
-    <div class="feature">
-      <div class="feature-icon">
-        <svg viewBox="0 0 18 18"><circle cx="9" cy="9" r="7"/><path d="M9 6v3l2 2"/></svg>
+
+      <div class="pref-group">
+        <span class="pref-label">Tjänstgöringsgrad</span>
+        <div class="tag-row">
+          <span class="tag active">Heltid</span>
+          <span class="tag">Deltid</span>
+          <span class="tag">Konsult / Frilans</span>
+          <span class="tag">Praktik</span>
+          <span class="tag">Säsongsarbete</span>
+        </div>
       </div>
-      <h3>Auto-ansökan dygnet runt</h3>
-      <p>Jobbyo söker till matchande tjänster var 24:e timme – du får ett e-postmeddelande varje gång.</p>
-    </div>
-    <div class="feature">
-      <div class="feature-icon">
-        <svg viewBox="0 0 18 18"><path d="M2 14V6l7-4 7 4v8"/><rect x="6" y="10" width="6" height="4" rx="1"/></svg>
+
+      <div class="pref-group">
+        <span class="pref-label">Anställningstyp</span>
+        <div class="tag-row">
+          <span class="tag active">Tillsvidareanställning</span>
+          <span class="tag">Vikariat</span>
+          <span class="tag active-orange">Projektanställning</span>
+          <span class="tag">Provanställning</span>
+        </div>
       </div>
-      <h3>Ansökningsöversikt</h3>
-      <p>Håll koll på alla dina ansökningar, status och nästa steg i en samlad och tydlig dashboard.</p>
-    </div>
-    <div class="feature">
-      <div class="feature-icon">
-        <svg viewBox="0 0 18 18"><path d="M9 2l2 5h5l-4 3 1.5 5L9 12l-4.5 3L6 10 2 7h5z"/></svg>
+
+      <div class="pref-group">
+        <span class="pref-label">Företagsstorlek</span>
+        <div class="tag-row">
+          <span class="tag">Startup (1–50)</span>
+          <span class="tag active-blue">Scale-up (50–500)</span>
+          <span class="tag active-blue">Medelstort (500–5 000)</span>
+          <span class="tag">Storföretag (5 000+)</span>
+        </div>
       </div>
-      <h3>Feedback-loop</h3>
-      <p>Varje gång du godkänner eller avvisar ett jobb lär sig AI:n mer om vad du faktiskt vill ha.</p>
+
+      <div class="pref-group">
+        <span class="pref-label">Förflyttningsvilja</span>
+        <div class="tag-row">
+          <span class="tag active">Ej villig att flytta</span>
+          <span class="tag">Kan flytta i Sverige</span>
+          <span class="tag">Öppen för utlandet</span>
+        </div>
+      </div>
+
+      <div class="pref-group">
+        <span class="pref-label">Löneförväntning (SEK/mån)</span>
+        <div class="salary-range">
+          <div class="salary-row">
+            <span>Minimum</span><span class="val">35 000 kr</span>
+          </div>
+          <div class="salary-row">
+            <span>Maximum</span><span class="val">65 000 kr</span>
+          </div>
+          <div class="range-track"><div class="range-fill"></div></div>
+        </div>
+      </div>
+
+      <div class="pref-group" style="margin-bottom:0">
+        <span class="pref-label">Annons­språk</span>
+        <div class="tag-row">
+          <span class="tag active">Svenska</span>
+          <span class="tag active">Engelska</span>
+          <span class="tag">Norska</span>
+          <span class="tag">Danska</span>
+        </div>
+      </div>
     </div>
   </div>
 </section>
- 
+
 <div class="divider"></div>
- 
+
 <!-- FÖRDELAR & NACKDELAR -->
 <section>
   <div class="reveal">
     <div class="section-tag">Fördelar & nackdelar</div>
     <h2 class="section-title">Vad bör du känna till?</h2>
-    <p class="section-lead">Jobbyo är ett kraftfullt verktyg – men det passar bättre för vissa än andra.</p>
+    <p class="section-lead">Jobbyo är kraftfullt – men det är ärligt med vad det är och inte är.</p>
   </div>
   <div class="pros-cons-grid reveal">
     <div class="pros-box">
-      <h3>
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#00c875" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#00c875" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Fördelar
-      </h3>
+      <h3>Fördelar</h3>
       <ul>
-        <li>Sparar 20+ timmar per vecka på jobbsökande</li>
-        <li>3 gånger fler intervjukallelser jämfört med manuell sökning</li>
-        <li>Personliga och välskrivna ansökningar – inte massutskick</li>
-        <li>Full kontroll – du godkänner varje ansökan innan den skickas</li>
-        <li>Bli smartare med varje interaktion</li>
-        <li>Gratis grundplan tillgänglig utan kreditkort</li>
-        <li>Hittar jobbannonser du aldrig skulle hittat själv</li>
+        <li>Sparar 20+ timmar per vecka på manuella ansökningar</li>
+        <li>3× fler intervjukallelser jämfört med manuell sökning</li>
+        <li>Varje ansökan är skräddarsydd – inget massutskick</li>
+        <li>Screening-frågor besvaras automatiskt i din röst</li>
+        <li>Full kontroll på Premium/Max – godkänn varje ansökan</li>
+        <li>Ghost job-filter eliminerar stängda annonser</li>
+        <li>3 dagars gratis provperiod utan kreditkort</li>
+        <li>Ingen bindningstid – avsluta när som helst</li>
+        <li>Intervjugaranti 30 dagar på Max-planen</li>
       </ul>
     </div>
     <div class="cons-box">
-      <h3>
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#ffa032" stroke-width="1.5"/><path d="M8 5v4M8 11v.5" stroke="#ffa032" stroke-width="1.5" stroke-linecap="round"/></svg>
-        Att tänka på
-      </h3>
+      <h3>Att tänka på</h3>
       <ul>
-        <li>AI-genererade texter kan behöva justeras för din personliga röst</li>
-        <li>Gratisplanen har begränsat antal ansökningar per dag</li>
-        <li>Kan ge sämre resultat för mycket nischade eller specialiserade roller</li>
-        <li>Relativt hög kostnad om du prenumererar veckovis under lång tid</li>
-        <li>Ingen mobilapp för närvarande</li>
+        <li>AI-texter kan ibland behöva justeras för din röst</li>
+        <li>Starter ger ingen kontroll – AI ansöker utan godkännande</li>
+        <li>Sämre för mycket nischade roller med få annonser</li>
+        <li>Priser i USD, faktureras veckovis – kan bli dyrt på sikt</li>
+        <li>Max-planen är dyrast och passar bäst seniora roller</li>
       </ul>
     </div>
   </div>
 </section>
- 
+
 <div class="divider"></div>
- 
+
 <!-- PRISER -->
 <section id="priser">
   <div class="reveal">
     <div class="section-tag">Priser</div>
-    <h2 class="section-title">Välj den plan som passar dig</h2>
-    <p class="section-lead">Jobbyo erbjuder en gratis grundplan och betaltjänster för den som vill ha mer kapacitet. Priserna är i USD per vecka.</p>
+    <h2 class="section-title">Tre planer – välj din nivå av kontroll</h2>
+    <p class="section-lead">Alla planer inkluderar 3 dagars gratis provperiod. Ingen bindningstid. Avsluta när du vill.</p>
   </div>
+
   <div class="pricing-grid reveal">
- 
+
+    <!-- STARTER -->
     <div class="price-card">
-      <div class="plan-name">Gratis</div>
-      <div class="plan-price">0<sup> kr</sup></div>
-      <div class="plan-period">för alltid · ingen bindningstid</div>
+      <div class="plan-name">Starter</div>
+      <div class="plan-price"><sup>$</sup>19<sub>/vecka</sub></div>
+      <div class="plan-trial">✦ 3 dagars gratis provperiod</div>
+      <div class="plan-tagline">AI:n ansöker automatiskt utan att du behöver godkänna. Perfekt för maximal volym utan tidsinsats.</div>
       <div class="plan-divider"></div>
-      <ul class="plan-features">
-        <li><span class="check">✓</span> Smart jobbanpassning</li>
-        <li><span class="check">✓</span> AI auto-ansökan (begränsat)</li>
-        <li><span class="check">✓</span> Personlig CV-feedback</li>
-        <li><span class="check">✓</span> Jobbspårning i dashboard</li>
-        <li><span class="check">✓</span> Ghost job-detektion</li>
-      </ul>
-      <a href="https://jobbyo.ai" target="_blank" class="plan-btn plan-btn-outline">Kom igång gratis</a>
+      <div class="plan-compare">
+        <div class="plan-row"><span class="ck">✓</span><div><strong>10 matchningar per dag</strong><span class="sub-note">AI hittar och ansöker varje morgon</span></div></div>
+        <div class="plan-row"><span class="ck">✓</span><div><strong>Auto-ansökan utan godkännande</strong><span class="sub-note">AI skickar direkt baserat på dina val</span></div></div>
+        <div class="plan-row"><span class="ck">✓</span><div><strong>CV anpassas per roll</strong><span class="sub-note">Nyckelord och sektioner justeras</span></div></div>
+        <div class="plan-row"><span class="ck">✓</span><div><strong>Personligt brev per tjänst</strong></div></div>
+        <div class="plan-row"><span class="ck">✓</span><div><strong>Stora jobbsajter</strong><span class="sub-note">Indeed, LinkedIn, Glassdoor m.fl.</span></div></div>
+        <div class="plan-row"><span class="ck">✓</span><div><strong>Ghost job-filter</strong></div></div>
+        <div class="plan-row"><span class="ck">✓</span><div><strong>Veckovis framstegsrapport</strong></div></div>
+      </div>
+      <a href="https://jobbyo.ai" target="_blank" class="plan-btn plan-btn-outline">Starta gratis provperiod</a>
     </div>
- 
+
+    <!-- PREMIUM -->
     <div class="price-card featured">
       <div class="popular-tag">Mest populär</div>
-      <div class="plan-name">Starter</div>
-      <div class="plan-price">~130<sup> kr</sup></div>
-      <div class="plan-period">per vecka · $12/vecka i USD</div>
-      <div class="plan-divider"></div>
-      <ul class="plan-features">
-        <li><span class="check">✓</span> Allt i gratisplanen</li>
-        <li><span class="check">✓</span> 140 auto-ansökningar/månad</li>
-        <li><span class="check">✓</span> Obegränsad CV-anpassning</li>
-        <li><span class="check">✓</span> Prioriterad jobbanpassning</li>
-        <li><span class="check">✓</span> AI-optimerade ansökningar</li>
-      </ul>
-      <a href="https://jobbyo.ai" target="_blank" class="plan-btn plan-btn-filled">Välj Starter</a>
-    </div>
- 
-    <div class="price-card">
       <div class="plan-name">Premium</div>
-      <div class="plan-price">~200<sup> kr</sup></div>
-      <div class="plan-period">per vecka · $19/vecka i USD</div>
+      <div class="plan-price"><sup>$</sup>29<sub>/vecka</sub></div>
+      <div class="plan-trial">✦ 3 dagars gratis provperiod</div>
+      <div class="plan-tagline">Du godkänner varje ansökan innan den skickas. Full kontroll med AI:ns kraft bakom.</div>
       <div class="plan-divider"></div>
-      <ul class="plan-features">
-        <li><span class="check">✓</span> Allt i Starter</li>
-        <li><span class="check">✓</span> 280 auto-ansökningar/månad</li>
-        <li><span class="check">✓</span> White-glove fullservice</li>
-        <li><span class="check">✓</span> Prioriterad kundsupport</li>
-        <li><span class="check">✓</span> Djupgående CV-analys</li>
-      </ul>
-      <a href="https://jobbyo.ai" target="_blank" class="plan-btn plan-btn-outline">Välj Premium</a>
+      <div class="plan-compare">
+        <div class="plan-row"><span class="ck">✓</span><div><strong>Allt i Starter</strong></div></div>
+        <div class="plan-row"><span class="ck">✓</span><div><strong>Du godkänner varje ansökan</strong><span class="sub-note">Ingenting skickas utan ditt OK</span></div></div>
+        <div class="plan-row"><span class="ck">✓</span><div><strong>Screening-frågor besvaras av AI</strong><span class="sub-note">I din röst, baserat på ditt CV</span></div></div>
+        <div class="plan-row"><span class="ck">✓</span><div><strong>ATS-optimerat format</strong><span class="sub-note">Maximerar chansen att passera filter</span></div></div>
+        <div class="plan-row"><span class="ck">✓</span><div><strong>Nisch- & branschspecifika sajter</strong><span class="sub-note">Nå annonser konkurrenter missar</span></div></div>
+        <div class="plan-row"><span class="ck">✓</span><div><strong>AI lär sig av din feedback</strong><span class="sub-note">Träffar prick efter 3 dagar</span></div></div>
+      </div>
+      <a href="https://jobbyo.ai" target="_blank" class="plan-btn plan-btn-filled">Starta gratis provperiod</a>
     </div>
- 
+
+    <!-- MAX -->
+    <div class="price-card max-plan">
+      <div class="max-tag">🛡️ Intervjugaranti</div>
+      <div class="plan-name">Max</div>
+      <div class="plan-price"><sup>$</sup>59<sub>/vecka</sub></div>
+      <div class="plan-trial">✦ 3 dagars gratis provperiod</div>
+      <div class="plan-tagline">AI + mänsklig granskning. Intervju inom 30 dagar eller pengarna tillbaka.</div>
+      <div class="plan-divider"></div>
+      <div class="plan-compare">
+        <div class="plan-row"><span class="ck ck-purple">✓</span><div><strong>Allt i Premium</strong></div></div>
+        <div class="plan-row"><span class="ck ck-purple">✓</span><div><strong>Prioriterade ansökningar</strong><span class="sub-note">Dina ansökningar skickas ut först</span></div></div>
+        <div class="plan-row"><span class="ck ck-purple">✓</span><div><strong>Mänsklig granskning av varje ansökan</strong><span class="sub-note">En riktig person kontrollerar innan sändning</span></div></div>
+        <div class="plan-row"><span class="ck ck-purple">✓</span><div><strong>Veckovist 1:1-möte</strong><span class="sub-note">Strategi, feedback och coaching</span></div></div>
+        <div class="plan-row"><span class="ck ck-purple">✓</span><div><strong>30-dagars intervjugaranti</strong><span class="sub-note">Pengarna tillbaka om inga intervjuer</span></div></div>
+      </div>
+      <a href="https://jobbyo.ai" target="_blank" class="plan-btn plan-btn-purple">Starta gratis provperiod</a>
+    </div>
+
   </div>
+
+  <!-- JÄMFÖRELSETABELL -->
+  <div class="compare-table-wrap reveal">
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Funktion</th>
+          <th>Starter · $19/v</th>
+          <th class="highlight">Premium · $29/v</th>
+          <th class="highlight-purple">Max · $59/v</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Matchningar per dag</td><td>10</td><td class="yes">10</td><td class="yes-purple">10 (prioritet)</td></tr>
+        <tr><td>CV anpassas per roll</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes-purple">✓</td></tr>
+        <tr><td>Personligt brev per tjänst</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes-purple">✓</td></tr>
+        <tr><td>Auto-ansökan utan godkännande</td><td class="yes">✓</td><td class="no">✗</td><td class="no">✗</td></tr>
+        <tr><td>Du godkänner varje ansökan</td><td class="no">✗</td><td class="yes">✓</td><td class="yes-purple">✓</td></tr>
+        <tr><td>Screening-frågor besvaras av AI</td><td class="no">✗</td><td class="yes">✓</td><td class="yes-purple">✓</td></tr>
+        <tr><td>Nisch- & branschspecifika sajter</td><td class="no">✗</td><td class="yes">✓</td><td class="yes-purple">✓</td></tr>
+        <tr><td>ATS-optimerat format</td><td class="no">✗</td><td class="yes">✓</td><td class="yes-purple">✓</td></tr>
+        <tr><td>Mänsklig granskning av ansökan</td><td class="no">✗</td><td class="no">✗</td><td class="yes-purple">✓</td></tr>
+        <tr><td>Veckovist 1:1-möte</td><td class="no">✗</td><td class="no">✗</td><td class="yes-purple">✓</td></tr>
+        <tr><td>30-dagars intervjugaranti</td><td class="no">✗</td><td class="no">✗</td><td class="yes-purple">✓</td></tr>
+        <tr><td>Ghost job-filter</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes-purple">✓</td></tr>
+        <tr><td>Ingen bindningstid</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes-purple">✓</td></tr>
+        <tr><td>3 dagars gratis provperiod</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes-purple">✓</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="price-note">Priser i USD. Faktureras veckovis. Spara 20% vid kvartalsfakturering.</p>
 </section>
- 
+
 <div class="divider"></div>
- 
-<!-- VEM ÄR DET FÖR -->
-<section id="vem">
+
+<!-- FAQ -->
+<section id="faq">
   <div class="reveal">
-    <div class="section-tag">För vem?</div>
-    <h2 class="section-title">Är Jobbyo rätt för dig?</h2>
-    <p class="section-lead">Verktyget passar bäst för dessa grupper av jobbsökare.</p>
+    <div class="section-tag">Vanliga frågor</div>
+    <h2 class="section-title">Frågor & svar</h2>
+    <p class="section-lead">Allt du behöver veta om Jobbyo innan du kommer igång.</p>
   </div>
-  <div class="who-grid reveal">
-    <div class="who-card">
-      <span class="who-emoji">💼</span>
-      <h3>Yrkesverksamma</h3>
-      <p>Du jobbar heltid men vill söka nytt utan att offra kvällar och helger på ansökningar.</p>
+  <div class="faq-list reveal">
+
+    <div class="faq-item">
+      <button class="faq-q">Hur skiljer sig Starter, Premium och Max åt i praktiken? <span class="faq-icon">+</span></button>
+      <div class="faq-a"><div class="faq-a-inner">
+        <strong>Starter ($19/v):</strong> AI ansöker automatiskt varje dag utan godkännande. Bäst för maximal volym.<br><br>
+        <strong>Premium ($29/v):</strong> Du granskar och godkänner varje ansökan. Full kontroll med AI:ns kraft bakom. Populärast.<br><br>
+        <strong>Max ($59/v):</strong> Allt i Premium plus mänsklig granskning, veckovisa 1:1-möten och 30-dagars intervjugaranti.
+      </div></div>
     </div>
-    <div class="who-card">
-      <span class="who-emoji">🎓</span>
-      <h3>Nyexaminerade</h3>
-      <p>Ny på arbetsmarknaden och vill komma ut brett med professionella och välformulerade ansökningar.</p>
+
+    <div class="faq-item">
+      <button class="faq-q">Märker rekryterare att en AI skrivit ansökan? <span class="faq-icon">+</span></button>
+      <div class="faq-a"><div class="faq-a-inner">Nej. Varje ansökan skräddarsys till den specifika rollen – CV:t justeras, brevet refererar till jobbannonsen och screening-frågor besvaras i din röst. Jobbyo skriver inte generiskt; det skriver utifrån din profil och stil.</div></div>
     </div>
-    <div class="who-card">
-      <span class="who-emoji">🔄</span>
-      <h3>Karriärbyten</h3>
-      <p>Byter bransch och behöver hjälp att lyfta fram rätt kompetenser för nya typer av roller.</p>
+
+    <div class="faq-item">
+      <button class="faq-q">Måste jag ladda upp ett nytt CV varje gång? <span class="faq-icon">+</span></button>
+      <div class="faq-a"><div class="faq-a-inner">Nej, du laddar upp ditt CV en enda gång. Jobbyo använder det som bas och anpassar det dynamiskt för varje tjänst. Du kan uppdatera det när du vill.</div></div>
     </div>
-    <div class="who-card">
-      <span class="who-emoji">⚡</span>
-      <h3>Nyligen varslade</h3>
-      <p>Vill komma igång snabbt med en strukturerad jobbsökning utan att fastna i manuellt arbete.</p>
+
+    <div class="faq-item">
+      <button class="faq-q">Vad innebär intervjugarantin på Max-planen? <span class="faq-icon">+</span></button>
+      <div class="faq-a"><div class="faq-a-inner">Om du inte fått minst en intervjukallelse inom 30 dagar på Max-planen återbetalar Jobbyo hela beloppet – inga frågor ställs. Gäller under förutsättning att du haft aktiv profil och godkänt ansökningar under perioden.</div></div>
     </div>
+
+    <div class="faq-item">
+      <button class="faq-q">Kan jag avsluta abonnemanget när som helst? <span class="faq-icon">+</span></button>
+      <div class="faq-a"><div class="faq-a-inner">Ja. Ingen bindningstid och inga dolda avgifter. Du avslutar med ett klick i inställningarna. Spara 20% vid kvartalsfakturering.</div></div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q">Hur säkert är det med mina personuppgifter? <span class="faq-icon">+</span></button>
+      <div class="faq-a"><div class="faq-a-inner">Jobbyo använder krypterade anslutningar och följer strikta GDPR-standarder. Ditt CV och dina personuppgifter delas aldrig med tredje part.</div></div>
+    </div>
+
   </div>
 </section>
- 
-<div class="divider"></div>
- 
-<!-- OMDÖMEN -->
-<section>
-  <div class="reveal">
-    <div class="section-tag">Användare tycker</div>
-    <h2 class="section-title">Vad säger de som prövat?</h2>
-    <p class="section-lead">Riktiga omdömen från jobbsökare som använt Jobbyo.</p>
-  </div>
-  <div class="testimonials reveal">
-    <div class="quote">
-      <div class="stars">★★★★★</div>
-      <p class="quote-text">"Jobbyo sökte till 40+ tjänster för mig under den första veckan. Personliga breven var så välskrivna att jag inte kunde avgöra att de var AI-skrivna. Två jobberbjudanden inom en månad."</p>
-      <div class="quote-author"><div class="avatar">AK</div> Anna K. · Marknadsförare</div>
-    </div>
-    <div class="quote">
-      <div class="stars">★★★★★</div>
-      <p class="quote-text">"Jag sökte manuellt i månader utan ett enda svar. Bytte till Jobbyo och hade 5 intervjuer inbokade inom två veckor. Önskar att jag hittat det tidigare."</p>
-      <div class="quote-author"><div class="avatar">ML</div> Marcus L. · Mjukvaruutvecklare</div>
-    </div>
-    <div class="quote">
-      <div class="stars">★★★★★</div>
-      <p class="quote-text">"Feedback-loopen är otrolig. Efter att ha avvisat ett par roller och förklarat varför, började AI:n matcha mig med exakt de positioner jag ville ha."</p>
-      <div class="quote-author"><div class="avatar">SR</div> Sara R. · Ekonom</div>
-    </div>
-  </div>
-</section>
- 
+
 <!-- CTA -->
 <div class="cta-section">
   <div class="cta-glow"></div>
   <div class="section-tag">Kom igång idag</div>
   <h2>Sluta söka jobb manuellt</h2>
-  <p>Låt Jobbyo ta jobbet – du fokuserar på att förbereda dig för intervjuerna.</p>
-  <a href="https://jobbyo.ai" target="_blank" class="btn-primary" style="font-size: 16px; padding: 16px 40px;">
-    Prova Jobbyo gratis →
+  <p>Låt Jobbyo ta jobbet – du fokuserar på intervjuerna. De flesta får sin första kallelse inom 2–3 veckor.</p>
+  <a href="https://jobbyo.ai" target="_blank" class="btn-primary" style="font-size:16px;padding:16px 40px;">
+    Prova Jobbyo gratis i 3 dagar →
   </a>
+  <p class="cta-note">Inget kreditkort krävs · Avsluta när du vill · Priser i USD</p>
 </div>
- 
+
 <footer>
-  <p>Den här sidan är skapad i informationssyfte. Jobbyo är ett externt verktyg –
-  besök <a href="https://jobbyo.ai" target="_blank">jobbyo.ai</a> för aktuella priser och villkor.</p>
+  <p>Sidan är skapad i informationssyfte och är inte officiellt ansluten till Jobbyo.<br>
+  Besök <a href="https://jobbyo.ai" target="_blank">jobbyo.ai</a> för aktuella priser och villkor.</p>
 </footer>
- 
+
 <script>
   const reveals = document.querySelectorAll('.reveal');
   const observer = new IntersectionObserver(entries => {
     entries.forEach(e => {
       if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
     });
-  }, { threshold: 0.12 });
+  }, { threshold: 0.1 });
   reveals.forEach(r => observer.observe(r));
+
+  document.querySelectorAll('.faq-q').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.faq-item');
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!isOpen) item.classList.add('open');
+    });
+  });
 </script>
- 
+
 </body>
+</html>
